@@ -1,5 +1,7 @@
 using Shopper.Application.Interfaces;
 using Shopper.Application.Usecasess.CategoryServices;
+using Shopper.Application.Usecasess.CustomerServices;
+using Shopper.Application.Usecasess.OrderServices;
 using Shopper.Persistence.Context;
 using Shopper.Persistence.Repositories;
 
@@ -9,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICategoryService, CategoryServices>();
+builder.Services.AddScoped<ICustomerServices, CustomerServices>();
+builder.Services.AddScoped<IOrderServices, OrderServices>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
