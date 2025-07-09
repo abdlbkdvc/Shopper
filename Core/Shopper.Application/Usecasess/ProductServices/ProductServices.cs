@@ -33,8 +33,8 @@ namespace Shopper.Application.Usecasess.ProductServices
 
         public async Task DeleteProductAsync(int id)
         {
-            var value = await _repository.GetByIdAsync(id);
-            await _repository.DeleteAsync(value);
+            var entity = await _repository.GetByIdAsync(id);
+            await _repository.DeleteAsync(entity);
         }
 
         public async Task<List<ResultProductDto>> GetAllProductAsync()
@@ -55,12 +55,29 @@ namespace Shopper.Application.Usecasess.ProductServices
 
         public async Task<GetByIdProductDto> GetByIdProductAsync(int id)
         {
-            var values = await _repository.GetByIdAsync(id);
+            var entity = await _repository.GetByIdAsync(id);
+            return new GetByIdProductDto
+            {
+                CategoryId = entity.CategoryId,
+                Description = entity.Description,
+                ImageUrl = entity.ImageUrl,
+                Price = entity.Price,
+                ProductId = entity.ProductId,
+                ProductName = entity.ProductName,
+                Stock = entity.Stock
+            };
         }
 
-        public Task UpdateProductAsync(UpdateProductDto updateProductDto)
+        public async Task UpdateProductAsync(UpdateProductDto dto)
         {
-            throw new NotImplementedException();
+            var entity = await _repository.GetByIdAsync(dto.ProductId);
+            entity.ProductName = dto.ProductName;
+            entity.Stock = dto.Stock;
+            entity.ImageUrl = dto.ImageUrl;
+            entity.Price = dto.Price;
+            entity.Description = dto.Description;
+            entity.CategoryId = dto.CategoryId;
+            await _repository.UpdateAsync(entity);
         }
     }
 }

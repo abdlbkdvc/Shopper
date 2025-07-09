@@ -22,7 +22,6 @@ namespace Shopper.Application.Usecasess.OrderItemServices
         {
             await _repository.CreateAsync(new OrderItem
             {
-                OrderId = dto.OrderId,
                 ProductId = dto.ProductId,
                 Quantity = dto.Quantity,
                 TotalPrice = dto.TotalPrice

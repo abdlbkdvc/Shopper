@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shopper.Application.Interfaces;
 using Shopper.Persistence.Context;
+using System.Linq.Expressions;
 
 
 namespace Shopper.Persistence.Repositories
@@ -29,6 +30,11 @@ namespace Shopper.Persistence.Repositories
         public async Task<List<T>> GetAllAsync()
         {
             return await _context.Set<T>().ToListAsync();
+        }
+
+        public async Task<T> GetByFilterAsync(Expression<Func<T, bool>> filter)
+        {
+            return await _context.Set<T>().SingleOrDefaultAsync(filter);
         }
 
         public async Task<T> GetByIdAsync(int id)

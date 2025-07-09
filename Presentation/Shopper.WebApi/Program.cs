@@ -1,7 +1,11 @@
 using Shopper.Application.Interfaces;
+using Shopper.Application.Usecasess.CartItemServices;
+using Shopper.Application.Usecasess.CartServices;
 using Shopper.Application.Usecasess.CategoryServices;
 using Shopper.Application.Usecasess.CustomerServices;
+using Shopper.Application.Usecasess.OrderItemServices;
 using Shopper.Application.Usecasess.OrderServices;
+using Shopper.Application.Usecasess.ProductServices;
 using Shopper.Persistence.Context;
 using Shopper.Persistence.Repositories;
 
@@ -13,6 +17,11 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICategoryService, CategoryServices>();
 builder.Services.AddScoped<ICustomerServices, CustomerServices>();
 builder.Services.AddScoped<IOrderServices, OrderServices>();
+builder.Services.AddScoped<IOrderItemServices, OrderItemServices>();
+builder.Services.AddScoped<IProductServices, ProductServices>();
+builder.Services.AddScoped<ICartServices, CartServices>();
+builder.Services.AddScoped<ICartItemServices, CartItemServices>();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,4 +1,5 @@
 ﻿using Shopper.Application.Dtos.OrderDtos;
+using Shopper.Application.Dtos.OrderItemDtos;
 using Shopper.Application.Interfaces;
 using Shopper.Domain.Entities;
 using System;
@@ -11,11 +12,13 @@ namespace Shopper.Application.Usecasess.OrderServices
 {
     public class OrderServices : IOrderServices
     {
-        private readonly IRepository<Order> _repository;
+        private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<OrderItem> _orderItemRepository;
 
-        public OrderServices(IRepository<Order> repository)
+        public OrderServices(IRepository<Order> orderRepository, IRepository<OrderItem> orderItemRepository)
         {
-            _repository = repository;
+            _orderRepository = orderRepository;
+            _orderItemRepository = orderItemRepository;
         }
 
         public async Task CreateOrderAsync(CreateOrderDto dto)
@@ -30,49 +33,69 @@ namespace Shopper.Application.Usecasess.OrderServices
             //public Customer Customer { get; set; }
             //public ICollection<OrderItem> OrderItems { get; set; }
 
-            await _repository.CreateAsync(new Order
+            var order = new Order
             {
                 OrderDate = dto.OrderDate,
                 TotalAmount = dto.TotalAmount,
                 OrderStatus = dto.OrderStatus,
-                BillingAddress = dto.BillingAddress,
                 ShippingAddress = dto.ShippingAddress,
                 PaymentMethod = dto.PaymentMethod,
-                CustomerId = dto.CustomerId
-            });
+                CustomerId = dto.CustomerId,
+            };
+            await _orderRepository.CreateAsync(order);
+
+            foreach (var item in dto.OrderItems)
+            {
+                await _orderItemRepository.CreateAsync(new OrderItem
+                {
+                    OrderId = order.OrderId,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    TotalPrice = item.TotalPrice
+                });
+            }
         }
 
         public async Task DeleteOrderAsync(int id)
         {
-            var value = await _repository.GetByIdAsync(id);
-            await _repository.DeleteAsync(value);
+            var value = await _orderRepository.GetByIdAsync(id);
+            await _orderRepository.DeleteAsync(value);
         }
 
         public async Task<List<ResultOrderDto>> GetAllOrderAsync()
         {
-            var values = await _repository.GetAllAsync();
+            var values = await _orderRepository.GetAllAsync(); // Include ile birlikte OrderItems gelmeli
+
             return values.Select(entity => new ResultOrderDto
             {
+                OrderId = entity.OrderId,
                 OrderDate = entity.OrderDate,
                 TotalAmount = entity.TotalAmount,
                 OrderStatus = entity.OrderStatus,
-                BillingAddress = entity.BillingAddress,
                 ShippingAddress = entity.ShippingAddress,
                 PaymentMethod = entity.PaymentMethod,
-                CustomerId = entity.CustomerId
+                CustomerId = entity.CustomerId,
+                OrderItems = entity.OrderItems?
+                    .Select(oi => new ResultOrderItemDto
+                    {
+                        OrderId = oi.OrderId,
+                        ProductId = oi.ProductId,
+                        Quantity = oi.Quantity,
+                        TotalPrice = oi.TotalPrice,
+                        OrderItemId = oi.OrderItemId
+                    }).ToList() ?? new List<ResultOrderItemDto>()
             }).ToList();
-
         }
+
 
         public async Task<GetByIdOrderDto> GetByIdOrderAsync(int id)
         {
-            var value = await _repository.GetByIdAsync(id);
+            var value = await _orderRepository.GetByIdAsync(id);
             return new GetByIdOrderDto
             {
                 OrderDate = value.OrderDate,
                 TotalAmount = value.TotalAmount,
                 OrderStatus = value.OrderStatus,
-                BillingAddress = value.BillingAddress,
                 ShippingAddress = value.ShippingAddress,
                 PaymentMethod = value.PaymentMethod,
                 CustomerId = value.CustomerId
@@ -81,15 +104,14 @@ namespace Shopper.Application.Usecasess.OrderServices
 
         public async Task UpdateOrderAsync(UpdateOrderDto dto)
         {
-            var value = await _repository.GetByIdAsync(dto.OrderId);
+            var value = await _orderRepository.GetByIdAsync(dto.OrderId);
             value.OrderDate = dto.OrderDate;
             value.TotalAmount = dto.TotalAmount;
             value.OrderStatus = dto.OrderStatus;
             value.ShippingAddress = dto.ShippingAddress;
-            value.BillingAddress = dto.BillingAddress;
             value.CustomerId = dto.CustomerId;
             value.PaymentMethod = dto.PaymentMethod;
-            await _repository.UpdateAsync(value);
+            await _orderRepository.UpdateAsync(value);
 
         }
     }
